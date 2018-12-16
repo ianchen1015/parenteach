@@ -40,6 +40,37 @@ def handle_message(event):
         event.reply_token,
         TextSendMessage(text=content))
 
+    user_id = event.source.user_id
+    profile = line_bot_api.get_profile(user_id)
+
+    line_bot_api.push_message(user_id, TextSendMessage(text=profile.display_name+profile.user_id+profile.picture_url+profile.status_message))
+
+    buttons_template_message = TemplateSendMessage(
+        alt_text='Buttons template',
+        template=ButtonsTemplate(
+            thumbnail_image_url='https://example.com/image.jpg',
+            title='Menu',
+            text='Please select',
+            actions=[
+                PostbackAction(
+                    label='postback',
+                    text='postback text',
+                    data='action=buy&itemid=1'
+                ),
+                MessageAction(
+                    label='message',
+                    text='message text'
+                ),
+                URIAction(
+                    label='uri',
+                    uri='http://example.com/'
+                )
+            ]
+        )
+    )
+    line_bot_api.push_message(user_id, buttons_template_message)
+
+
 import os
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
