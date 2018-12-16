@@ -26,6 +26,8 @@ def callback():
     # handle webhook body
     try:
         handler.handle(body, signature)
+        message = TextSendMessage(text='Hello, world')
+        line_bot_api.reply_message(event.reply_token, message)
     except InvalidSignatureError:
         abort(400)
     return 'OK'
