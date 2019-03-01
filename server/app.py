@@ -33,11 +33,6 @@ def callback():
     # get request body as text
     body = request.get_data(as_text=True)
     print("Request body: " + body, "Signature: " + signature)
-    #print(type(body))
-    #print(json.loads(body)['events'][0]['message']['task'])
-
-    #event = json.loads(body)['events'][0]
-    #print(event)
 
     def setleavestarttime():
         buttons_template_message = TemplateSendMessage(
@@ -215,3 +210,6 @@ def absent():
 
     line_bot_api.push_message(user_id, buttons_template_message)
 
+@app.route("/a", methods=['GET'])
+def q():
+    print(setting_leave_reason)
