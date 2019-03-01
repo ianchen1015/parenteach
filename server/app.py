@@ -32,18 +32,6 @@ def callback():
     event = json.loads(body)['events'][0]
     #print(event)
 
-    if event['type'] == 'postback':
-        query = {}
-        for item in event['postback']['data'].split('&'):
-            query[item.split('=')[0]] = item.split('=')[1]
-        print(query)
-
-        if 'action' in query:
-            if query['action'] == 'applyforleave':
-                applyforleave()
-            if query['action'] == 'setleavetime':
-                setleavetime()
-
     def applyforleave() :
         buttons_template_message = TemplateSendMessage(
             alt_text='Buttons template',
@@ -97,6 +85,18 @@ def callback():
         )
 
         line_bot_api.push_message(user_id, buttons_template_message)
+        
+    if event['type'] == 'postback':
+        query = {}
+        for item in event['postback']['data'].split('&'):
+            query[item.split('=')[0]] = item.split('=')[1]
+        print(query)
+
+        if 'action' in query:
+            if query['action'] == 'applyforleave':
+                applyforleave()
+            if query['action'] == 'setleavetime':
+                setleavetime()
 
     return 'OK'
 
