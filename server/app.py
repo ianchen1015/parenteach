@@ -18,6 +18,13 @@ handler = WebhookHandler('8ce8beaa96240ba2beb9a47fdff092fb')
 
 user_id = 'Ue171fd928b7c3dee72656c700742be92'
 
+# leaving apply parameters
+leave_start_time = ''
+leave_end_time = ''
+leave_type = ''
+leave_reason = ''
+setting_leave_reason = False
+
 @app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
@@ -31,14 +38,6 @@ def callback():
 
     #event = json.loads(body)['events'][0]
     #print(event)
-
-    # leaving apply parameters
-    leave_start_time = ''
-    leave_end_time = ''
-    leave_type = ''
-    leave_reason = ''
-    setting_leave_reason = False
-
 
     def setleavestarttime():
         buttons_template_message = TemplateSendMessage(
