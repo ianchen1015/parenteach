@@ -192,6 +192,9 @@ def callback():
                     leave_end_time = event['postback']['params']['datetime']
                 if query['datatype'] == 'leavetype':
                     leave_type = query['leavetype']
+
+    print(leave_start_time, leave_end_time, leave_type, leave_reason, setting_leave_reason)
+
     return 'OK'
 
 @app.route("/absent", methods=['GET'])
