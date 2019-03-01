@@ -161,6 +161,7 @@ def callback():
     event = json.loads(body)['events'][0]
 
     if setting_leave_reason == True:
+        print('#####')
         leave_reason = event['message']['text']
         setting_leave_reason = False
         endofapplyleave()
