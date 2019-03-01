@@ -23,7 +23,8 @@ def callback():
     # get request body as text
     body = request.get_data(as_text=True)
     print("Request body: " + body, "Signature: " + signature)
-    print(body['events'])
+    print(type(body))
+    print(json.loads(body)['events'][0])
 
     # handle webhook body
     try:
