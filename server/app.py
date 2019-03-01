@@ -139,25 +139,22 @@ def callback():
         setting_leave_reason = True
 
     def endofapplyleave():
-        buttons_template_message = TemplateSendMessage(
-            alt_text='選擇請假時間',
-            template=ButtonsTemplate(
-                text="了解，感謝告知！\n{}\n{}\n{}\n{}".format(leave_start_time, leave_end_time, leave_type, leave_reason),
-            )
+
+        message = TextSendMessage(
+            text="了解，感謝告知！\n{}\n{}\n{}\n{}".format(leave_start_time, leave_end_time, leave_type, leave_reason)
         )
 
-        line_bot_api.push_message(user_id, buttons_template_message)
+        line_bot_api.push_message(user_id, message)
 
     def cancelleave():
-        buttons_template_message = TemplateSendMessage(
-            alt_text='取消請假',
-            template=ButtonsTemplate(
-                text="取消請假",
-            )
+
+        setting_leave_reason = False
+
+        message = TextSendMessage(
+            text="取消請假"
         )
 
-        line_bot_api.push_message(user_id, buttons_template_message)
-        setting_leave_reason = False
+        line_bot_api.push_message(user_id, message)
 
     event = json.loads(body)['events'][0]
 
@@ -218,4 +215,8 @@ def absent():
 
 @app.route("/a", methods=['GET'])
 def q():
-    print(setting_leave_reason)
+    message = TextSendMessage(
+        text='qwe'
+    )
+
+    line_bot_api.push_message(user_id, message)
