@@ -35,7 +35,7 @@ def callback():
     if event['type'] == 'postback':
         query = {}
         for item in event['postback']['data'].split('&'):
-            obj[item.split('=')[0]] = item.split('=')[1]
+            query[item.split('=')[0]] = item.split('=')[1]
         print(query)
 
         if 'action' in query:
@@ -81,7 +81,7 @@ def callback():
                     {
                         "type": "datetimepicker",
                         "label": "選擇日期和時間",
-                        "data": "資料 1",
+                        "data": "action=setleavetime",
                         "mode": "datetime",
                         "initial": "2019-01-12T07:00",
                         "max": "2020-01-12T07:00",
@@ -110,7 +110,7 @@ def absent():
             actions=[
                 PostbackTemplateAction(
                     label='開始請假',
-                    #text='postback text',
+                    text='開始請假',
                     data='action=applyforleave'
                 )
             ]
