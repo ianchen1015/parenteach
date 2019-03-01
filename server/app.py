@@ -120,6 +120,7 @@ def callback():
         line_bot_api.push_message(user_id, buttons_template_message)
 
     def setleavereason():
+        global setting_leave_reason
         buttons_template_message = TemplateSendMessage(
             alt_text='請告知請假原因',
             template=ButtonsTemplate(
@@ -161,7 +162,6 @@ def callback():
     event = json.loads(body)['events'][0]
 
     if setting_leave_reason == True:
-        print('#####')
         leave_reason = event['message']['text']
         setting_leave_reason = False
         endofapplyleave()
@@ -193,7 +193,7 @@ def callback():
                 if query['datatype'] == 'leavetype':
                     leave_type = query['leavetype']
 
-    print(leave_start_time, leave_end_time, leave_type, leave_reason, setting_leave_reason)
+    print('###', leave_start_time, leave_end_time, leave_type, leave_reason, setting_leave_reason)
 
     return 'OK'
 
