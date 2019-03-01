@@ -101,17 +101,14 @@ def callback():
                 actions=[
                     PostbackTemplateAction(
                         label='事假',
-                        text='事假',
                         data='action=setleavereason&leavetype=casual&datatype=leavetype'
                     ),
                     PostbackTemplateAction(
                         label='病假',
-                        text='病假',
                         data='action=setleavereason&leavetype=sick&datatype=leavetype'
                     ),
                     PostbackTemplateAction(
                         label='其他',
-                        text='其他',
                         data='action=setleavereason&leavetype=other&datatype=leavetype'
                     )
                 ]
