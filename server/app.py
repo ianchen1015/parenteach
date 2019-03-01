@@ -34,7 +34,7 @@ def callback():
     body = request.get_data(as_text=True)
     print("Request body: " + body, "Signature: " + signature)
 
-    global setting_leave_reason
+    global setting_leave_reason, leave_start_time, leave_end_time, leave_type, leave_reason
 
     def setleavestarttime():
         buttons_template_message = TemplateSendMessage(
