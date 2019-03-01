@@ -178,6 +178,7 @@ def callback():
                     setleavetype()
                 if query['action'] == 'setleavereason':
                     setleavereason()
+                    return 'ok'
                 if query['action'] == 'endofapplyleave':
                     endofapplyleave()
                 if query['action'] == 'cancelleave':
