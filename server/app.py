@@ -32,6 +32,12 @@ def callback():
     event = json.loads(body)['events'][0]
     #print(event)
 
+    # leaving apply parameters
+    leave_start_time = ''
+    leave_end_time = ''
+    setting_leave_reason = False
+
+
     def setleavestarttime():
         buttons_template_message = TemplateSendMessage(
             alt_text='選擇請假時間',
@@ -42,7 +48,35 @@ def callback():
                     {
                         "type": "datetimepicker",
                         "label": "選擇日期和時間",
-                        "data": "action=setleavereason",
+                        "data": "action=setleaveendtime&datatype=startdate",
+                        "mode": "datetime",
+                        "initial": "2019-01-12T07:00",
+                        "max": "2020-01-12T07:00",
+                        "min": "2018-01-12T07:00",
+                        "text": "時間已選擇"
+                    },
+                    {
+                        "type": "message",
+                        "label": "不請假了",
+                        "text": "取消請假"
+                    }
+                ]
+            )
+        )
+
+        line_bot_api.push_message(user_id, buttons_template_message)
+
+    def setleaveendtime():
+        buttons_template_message = TemplateSendMessage(
+            alt_text='選擇請假時間',
+            template=ButtonsTemplate(
+                text="請選擇日期和時間",
+                title="從什麼時候開始請假？",
+                actions=[
+                    {
+                        "type": "datetimepicker",
+                        "label": "選擇日期和時間",
+                        "data": "action=setleavetype&datatype=enddate",
                         "mode": "datetime",
                         "initial": "2019-01-12T07:00",
                         "max": "2020-01-12T07:00",
@@ -62,7 +96,7 @@ def callback():
 
     def setleavetype() :
         buttons_template_message = TemplateSendMessage(
-            alt_text='請假申請',
+            alt_text='請選擇請假的類別',
             template=ButtonsTemplate(
                 text="請選擇請假的類別",
                 title="要請什麼假呢？",
@@ -89,9 +123,36 @@ def callback():
 
     def setleavereason():
         buttons_template_message = TemplateSendMessage(
-            alt_text='選擇請假時間',
+            alt_text='請告知請假原因',
             template=ButtonsTemplate(
                 text="方便的話，還想了解一下請假的原因喔！\n（請以一則訊息說明）",
+                actions=[
+                    PostbackTemplateAction(
+                        label='不請假了',
+                        text='取消請假',
+                        data='action=cancelleave'
+                    )
+                ]
+            )
+        )
+
+        line_bot_api.push_message(user_id, buttons_template_message)
+
+    def endofapplyleave():
+        buttons_template_message = TemplateSendMessage(
+            alt_text='選擇請假時間',
+            template=ButtonsTemplate(
+                text="了解，感謝告知！\n{}\n{}".format(leave_start_time, leave_end_time),
+            )
+        )
+
+        line_bot_api.push_message(user_id, buttons_template_message)
+
+    def cancelleave():
+        buttons_template_message = TemplateSendMessage(
+            alt_text='取消請假',
+            template=ButtonsTemplate(
+                text="取消請假",
             )
         )
 
@@ -106,9 +167,21 @@ def callback():
         if 'action' in query:
             if query['action'] == 'setleavestarttime':
                 setleavestarttime()
+            if query['action'] == 'setleaveendtime':
+                setleaveendtime()
             if query['action'] == 'setleavetype':
                 setleavetype()
-
+            if query['action'] == 'setleavereason':
+                setleavereason()
+            if query['action'] == 'endofapplyleave':
+                endofapplyleave()
+            if query['action'] == 'cancelleave':
+                cancelleave()
+        if 'datatype' in query:
+            if query['datatype'] == 'startdate'
+                leave_start_time = event['postback']['params']['datetime']
+            if query['datatype'] == 'enddate'
+                leave_end_time = event['postback']['params']['datetime']
     return 'OK'
 
 @app.route("/absent", methods=['GET'])
