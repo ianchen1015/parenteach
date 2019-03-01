@@ -29,12 +29,14 @@ def callback():
     #print(type(body))
     #print(json.loads(body)['events'][0]['message']['task'])
 
-    event = json.loads(body)['events'][0]
+    #event = json.loads(body)['events'][0]
     #print(event)
 
     # leaving apply parameters
     leave_start_time = ''
     leave_end_time = ''
+    leave_type = ''
+    leave_reason = ''
     setting_leave_reason = False
 
 
@@ -71,7 +73,7 @@ def callback():
             alt_text='選擇請假時間',
             template=ButtonsTemplate(
                 text="請選擇日期和時間",
-                title="從什麼時候開始請假？",
+                title="下次來學習是哪時候呢？",
                 actions=[
                     {
                         "type": "datetimepicker",
@@ -104,17 +106,17 @@ def callback():
                     PostbackTemplateAction(
                         label='事假',
                         text='事假',
-                        data='action=setleavereason&leavetype=casual'
+                        data='action=setleavereason&leavetype=casual&datatype=leavetype'
                     ),
                     PostbackTemplateAction(
                         label='病假',
                         text='病假',
-                        data='action=setleavereason&leavetype=sick'
+                        data='action=setleavereason&leavetype=sick&datatype=leavetype'
                     ),
                     PostbackTemplateAction(
                         label='其他',
                         text='其他',
-                        data='action=setleavereason&leavetype=other'
+                        data='action=setleavereason&leavetype=other&datatype=leavetype'
                     )
                 ]
             )
@@ -137,12 +139,13 @@ def callback():
         )
 
         line_bot_api.push_message(user_id, buttons_template_message)
+        setting_leave_reason = True
 
     def endofapplyleave():
         buttons_template_message = TemplateSendMessage(
             alt_text='選擇請假時間',
             template=ButtonsTemplate(
-                text="了解，感謝告知！\n{}\n{}".format(leave_start_time, leave_end_time),
+                text="了解，感謝告知！\n{}\n{}\n{}\n{}".format(leave_start_time, leave_end_time, leave_type, leave_reason),
             )
         )
 
@@ -157,31 +160,41 @@ def callback():
         )
 
         line_bot_api.push_message(user_id, buttons_template_message)
+        setting_leave_reason = False
 
-    if event['type'] == 'postback':
-        query = {}
-        for item in event['postback']['data'].split('&'):
-            query[item.split('=')[0]] = item.split('=')[1]
-        print(query)
+    event = json.loads(body)['events'][0]
 
-        if 'action' in query:
-            if query['action'] == 'setleavestarttime':
-                setleavestarttime()
-            if query['action'] == 'setleaveendtime':
-                setleaveendtime()
-            if query['action'] == 'setleavetype':
-                setleavetype()
-            if query['action'] == 'setleavereason':
-                setleavereason()
-            if query['action'] == 'endofapplyleave':
-                endofapplyleave()
-            if query['action'] == 'cancelleave':
-                cancelleave()
-        if 'datatype' in query:
-            if query['datatype'] == 'startdate':
-                leave_start_time = event['postback']['params']['datetime']
-            if query['datatype'] == 'enddate':
-                leave_end_time = event['postback']['params']['datetime']
+    if setting_leave_reason == True:
+        leave_reason = event['message']['text']
+        setting_leave_reason = False
+        endofapplyleave()
+    else:
+        if event['type'] == 'postback':
+            query = {}
+            for item in event['postback']['data'].split('&'):
+                query[item.split('=')[0]] = item.split('=')[1]
+            print(query)
+
+            if 'action' in query:
+                if query['action'] == 'setleavestarttime':
+                    setleavestarttime()
+                if query['action'] == 'setleaveendtime':
+                    setleaveendtime()
+                if query['action'] == 'setleavetype':
+                    setleavetype()
+                if query['action'] == 'setleavereason':
+                    setleavereason()
+                if query['action'] == 'endofapplyleave':
+                    endofapplyleave()
+                if query['action'] == 'cancelleave':
+                    cancelleave()
+            if 'datatype' in query:
+                if query['datatype'] == 'startdate':
+                    leave_start_time = event['postback']['params']['datetime']
+                if query['datatype'] == 'enddate':
+                    leave_end_time = event['postback']['params']['datetime']
+                if query['datatype'] == 'leavetype':
+                    leave_type = query['leavetype']
     return 'OK'
 
 @app.route("/absent", methods=['GET'])
