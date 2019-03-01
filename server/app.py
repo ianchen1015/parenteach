@@ -25,43 +25,16 @@ def callback():
 
     # get request body as text
     body = request.get_data(as_text=True)
-    #print("Request body: " + body, "Signature: " + signature)
+    print("Request body: " + body, "Signature: " + signature)
     #print(type(body))
     #print(json.loads(body)['events'][0]['message']['task'])
 
     event = json.loads(body)['events'][0]
     #print(event)
 
-    def applyforleave() :
+    def setleavestarttime():
         buttons_template_message = TemplateSendMessage(
-            alt_text='Buttons template',
-            template=ButtonsTemplate(
-                text="請選擇請假的類別",
-                title="要請什麼假呢？",
-                actions=[
-                    PostbackTemplateAction(
-                        label='事假',
-                        text='事假',
-                        data='action=setleavetime&leavetype=casual'
-                    ),
-                    PostbackTemplateAction(
-                        label='病假',
-                        text='病假',
-                        data='leavetype=sick'
-                    ),
-                    PostbackTemplateAction(
-                        label='其他',
-                        text='其他',
-                        data='leavetype=other'
-                    )
-                ]
-            )
-        )
-        line_bot_api.push_message(user_id, buttons_template_message)
-
-    def setleavetime():
-        buttons_template_message = TemplateSendMessage(
-            alt_text='Buttons template',
+            alt_text='選擇請假時間',
             template=ButtonsTemplate(
                 text="請選擇日期和時間",
                 title="從什麼時候開始請假？",
@@ -69,11 +42,12 @@ def callback():
                     {
                         "type": "datetimepicker",
                         "label": "選擇日期和時間",
-                        "data": "action=setleavetime",
+                        "data": "action=setleavereason",
                         "mode": "datetime",
                         "initial": "2019-01-12T07:00",
                         "max": "2020-01-12T07:00",
-                        "min": "2018-01-12T07:00"
+                        "min": "2018-01-12T07:00",
+                        "text": "時間已選擇"
                     },
                     {
                         "type": "message",
@@ -85,7 +59,44 @@ def callback():
         )
 
         line_bot_api.push_message(user_id, buttons_template_message)
-        
+
+    def setleavetype() :
+        buttons_template_message = TemplateSendMessage(
+            alt_text='請假申請',
+            template=ButtonsTemplate(
+                text="請選擇請假的類別",
+                title="要請什麼假呢？",
+                actions=[
+                    PostbackTemplateAction(
+                        label='事假',
+                        text='事假',
+                        data='action=setleavereason&leavetype=casual'
+                    ),
+                    PostbackTemplateAction(
+                        label='病假',
+                        text='病假',
+                        data='action=setleavereason&leavetype=sick'
+                    ),
+                    PostbackTemplateAction(
+                        label='其他',
+                        text='其他',
+                        data='action=setleavereason&leavetype=other'
+                    )
+                ]
+            )
+        )
+        line_bot_api.push_message(user_id, buttons_template_message)
+
+    def setleavereason():
+        buttons_template_message = TemplateSendMessage(
+            alt_text='選擇請假時間',
+            template=ButtonsTemplate(
+                text="方便的話，還想了解一下請假的原因喔！\n（請以一則訊息說明）",
+            )
+        )
+
+        line_bot_api.push_message(user_id, buttons_template_message)
+
     if event['type'] == 'postback':
         query = {}
         for item in event['postback']['data'].split('&'):
@@ -93,10 +104,10 @@ def callback():
         print(query)
 
         if 'action' in query:
-            if query['action'] == 'applyforleave':
-                applyforleave()
-            if query['action'] == 'setleavetime':
-                setleavetime()
+            if query['action'] == 'setleavestarttime':
+                setleavestarttime()
+            if query['action'] == 'setleavetype':
+                setleavetype()
 
     return 'OK'
 
@@ -111,7 +122,7 @@ def absent():
                 PostbackTemplateAction(
                     label='開始請假',
                     text='開始請假',
-                    data='action=applyforleave'
+                    data='action=setleavestarttime'
                 )
             ]
         )
