@@ -178,9 +178,9 @@ def callback():
             if query['action'] == 'cancelleave':
                 cancelleave()
         if 'datatype' in query:
-            if query['datatype'] == 'startdate'
+            if query['datatype'] == 'startdate':
                 leave_start_time = event['postback']['params']['datetime']
-            if query['datatype'] == 'enddate'
+            if query['datatype'] == 'enddate':
                 leave_end_time = event['postback']['params']['datetime']
     return 'OK'
 
