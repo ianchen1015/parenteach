@@ -34,6 +34,8 @@ def callback():
     body = request.get_data(as_text=True)
     print("Request body: " + body, "Signature: " + signature)
 
+    global setting_leave_reason
+
     def setleavestarttime():
         buttons_template_message = TemplateSendMessage(
             alt_text='選擇請假時間',
