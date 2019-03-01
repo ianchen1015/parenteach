@@ -26,31 +26,40 @@ def callback():
     # get request body as text
     body = request.get_data(as_text=True)
     print("Request body: " + body, "Signature: " + signature)
-    print(type(body))
-    print(json.loads(body)['events'][0]['message']['task'])
+    #print(type(body))
+    #print(json.loads(body)['events'][0]['message']['task'])
 
-    # handle webhook body
-    try:
-        handler.handle(body, signature)
-    except InvalidSignatureError:
-        abort(400)
+    event = json.loads(body)['events'][0]
+
+    if event['type'] == 'postback':
+        if event['postback']['data'] == 'applyforleave':
+            buttons_template_message = TemplateSendMessage(
+                alt_text='Buttons template',
+                template=ButtonsTemplate(
+                    text="請選擇日期和時間",
+                    title="從什麼時候開始請假？",
+                    actions=[
+                        {
+                            "type": "datetimepicker",
+                            "label": "選擇日期和時間",
+                            "data": "資料 1",
+                            "mode": "datetime",
+                            "initial": "2019-01-12T07:00",
+                            "max": "2020-01-12T07:00",
+                            "min": "2018-01-12T07:00"
+                        },
+                        {
+                            "type": "message",
+                            "label": "不請假了",
+                            "text": "取消請假"
+                        }
+                    ]
+                )
+            )
+
+            line_bot_api.push_message(user_id, buttons_template_message)
 
     return 'OK'
-
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    #print("Handle: reply_token: " + event.reply_token + ", message: " + event.message.text)
-    # content = "{}: {}".format(event.source.user_id, event.message.text)
-    # line_bot_api.reply_message(
-    #     event.reply_token,
-    #     TextSendMessage(text=content))
-
-    user_id = event.source.user_id
-    profile = line_bot_api.get_profile(user_id)
-
-    print(event)
-
-    line_bot_api.push_message(user_id, TextSendMessage(text=profile.display_name+profile.user_id+profile.picture_url+profile.status_message))
 
 @app.route("/absent", methods=['GET'])
 def absent():
@@ -70,35 +79,4 @@ def absent():
     )
 
     line_bot_api.push_message(user_id, buttons_template_message)
-
-@app.route("/applyforleave", methods=['GET'])
-def applyForLeave():
-
-    buttons_template_message = TemplateSendMessage(
-        alt_text='Buttons template',
-        template=ButtonsTemplate(
-            text="請選擇日期和時間",
-            title="從什麼時候開始請假？",
-            actions=[
-                {
-                    "type": "datetimepicker",
-                    "label": "選擇日期和時間",
-                    "data": "資料 1",
-                    "mode": "datetime",
-                    "initial": "2019-01-12T07:00",
-                    "max": "2020-01-12T07:00",
-                    "min": "2018-01-12T07:00"
-                },
-                {
-                    "type": "message",
-                    "label": "不請假了",
-                    "text": "取消請假"
-                }
-            ]
-        )
-    )
-
-    line_bot_api.push_message(user_id, buttons_template_message)
-
-
 
