@@ -25,39 +25,78 @@ def callback():
 
     # get request body as text
     body = request.get_data(as_text=True)
-    print("Request body: " + body, "Signature: " + signature)
+    #print("Request body: " + body, "Signature: " + signature)
     #print(type(body))
     #print(json.loads(body)['events'][0]['message']['task'])
 
     event = json.loads(body)['events'][0]
+    #print(event)
 
     if event['type'] == 'postback':
-        if event['postback']['data'] == 'applyforleave':
-            buttons_template_message = TemplateSendMessage(
-                alt_text='Buttons template',
-                template=ButtonsTemplate(
-                    text="請選擇日期和時間",
-                    title="從什麼時候開始請假？",
-                    actions=[
-                        {
-                            "type": "datetimepicker",
-                            "label": "選擇日期和時間",
-                            "data": "資料 1",
-                            "mode": "datetime",
-                            "initial": "2019-01-12T07:00",
-                            "max": "2020-01-12T07:00",
-                            "min": "2018-01-12T07:00"
-                        },
-                        {
-                            "type": "message",
-                            "label": "不請假了",
-                            "text": "取消請假"
-                        }
-                    ]
-                )
-            )
+        query = {}
+        for item in event['postback']['data'].split('&'):
+            obj[item.split('=')[0]] = item.split('=')[1]
+        print(query)
 
-            line_bot_api.push_message(user_id, buttons_template_message)
+        if 'action' in query:
+            if query['action'] == 'applyforleave':
+                applyforleave()
+            if query['action'] == 'setleavetime':
+                setleavetime()
+
+    def applyforleave() :
+        buttons_template_message = TemplateSendMessage(
+            alt_text='Buttons template',
+            template=ButtonsTemplate(
+                text="請選擇請假的類別",
+                title="要請什麼假呢？",
+                actions=[
+                    PostbackTemplateAction(
+                        label='事假',
+                        text='事假',
+                        data='action=setleavetime&leavetype=casual'
+                    ),
+                    PostbackTemplateAction(
+                        label='病假',
+                        text='病假',
+                        data='leavetype=sick'
+                    ),
+                    PostbackTemplateAction(
+                        label='其他',
+                        text='其他',
+                        data='leavetype=other'
+                    )
+                ]
+            )
+        )
+        line_bot_api.push_message(user_id, buttons_template_message)
+
+    def setleavetime():
+        buttons_template_message = TemplateSendMessage(
+            alt_text='Buttons template',
+            template=ButtonsTemplate(
+                text="請選擇日期和時間",
+                title="從什麼時候開始請假？",
+                actions=[
+                    {
+                        "type": "datetimepicker",
+                        "label": "選擇日期和時間",
+                        "data": "資料 1",
+                        "mode": "datetime",
+                        "initial": "2019-01-12T07:00",
+                        "max": "2020-01-12T07:00",
+                        "min": "2018-01-12T07:00"
+                    },
+                    {
+                        "type": "message",
+                        "label": "不請假了",
+                        "text": "取消請假"
+                    }
+                ]
+            )
+        )
+
+        line_bot_api.push_message(user_id, buttons_template_message)
 
     return 'OK'
 
@@ -72,7 +111,7 @@ def absent():
                 PostbackTemplateAction(
                     label='開始請假',
                     #text='postback text',
-                    data='applyforleave'
+                    data='action=applyforleave'
                 )
             ]
         )
