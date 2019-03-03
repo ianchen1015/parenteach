@@ -73,7 +73,7 @@ def callback():
             alt_text='選擇請假時間',
             template=ButtonsTemplate(
                 text="請選擇日期和時間",
-                title="下次來學習是哪時候呢？",
+                title="下次來學校是哪時候呢？",
                 actions=[
                     {
                         "type": "datetimepicker",
@@ -149,8 +149,8 @@ def callback():
 
         message = TextSendMessage(
             text="了解，感謝告知！\n{}\n{}\n{}\n{}".format(
-                leave_start_time.replace('T', ' '),
-                leave_end_time.replace('T', ' '),
+                '從 ' + leave_start_time.replace('T', ' '),
+                '到' + leave_end_time.replace('T', ' '),
                 '類別：' + leave_reason_show[leave_type],
                 '原因：' + leave_reason)
         )
