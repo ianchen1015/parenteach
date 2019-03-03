@@ -141,8 +141,18 @@ def callback():
 
     def endofapplyleave():
 
+        leave_reason_show = {
+            'casual': '事假',
+            'sick': '病假',
+            'other': '其他'
+        }
+
         message = TextSendMessage(
-            text="了解，感謝告知！\n{}\n{}\n{}\n{}".format(leave_start_time, leave_end_time, leave_type, leave_reason)
+            text="了解，感謝告知！\n{}\n{}\n{}\n{}".format(
+                leave_start_time.replace('T', ' '),
+                leave_end_time.replace('T', ' '),
+                '類別：' + leave_reason_show[leave_type],
+                '原因：' + leave_reason)
         )
 
         line_bot_api.push_message(user_id, message)
@@ -158,7 +168,7 @@ def callback():
         line_bot_api.push_message(user_id, message)
 
     # response message
-    if 'message' in event:
+    if event['type'] == 'message':
         # response keywords
         if event['message']['text'] == '我要請假':
             setleavestarttime()
