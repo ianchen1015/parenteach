@@ -16,14 +16,8 @@ line_bot_api = LineBotApi('crvE525why6WynrVvNDD4EnXvEfWsAK4W8tjYHL18APUAkuI1NC6I
 # Channel Secret
 handler = WebhookHandler('8ce8beaa96240ba2beb9a47fdff092fb')
 
-#user_id = 'Ue171fd928b7c3dee72656c700742be92'
-
-# leaving apply parameters
-leave_start_time = ''
-leave_end_time = ''
-leave_type = ''
-leave_reason = ''
-setting_leave_reason = False # store next message if true
+# simulate database
+data = {}
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -34,11 +28,18 @@ def callback():
     body = request.get_data(as_text=True)
     print("Request body: " + body, "Signature: " + signature)
 
-    global setting_leave_reason, leave_start_time, leave_end_time, leave_type, leave_reason
-
     event = json.loads(body)['events'][0]
 
     user_id = event['source']['userId']
+
+    if user_id not in data:
+        data[user_id] = {
+            'leave_start_time': '',
+            'leave_end_time': '',
+            'leave_type': '',
+            'leave_reason': '',
+            'setting_leave_reason': False # store next message if true
+        }
 
     def setleavestarttime():
         buttons_template_message = TemplateSendMessage(
@@ -121,7 +122,6 @@ def callback():
         line_bot_api.push_message(user_id, buttons_template_message)
 
     def setleavereason():
-        global setting_leave_reason
         buttons_template_message = TemplateSendMessage(
             alt_text='請告知請假原因',
             template=ButtonsTemplate(
@@ -137,7 +137,7 @@ def callback():
         )
 
         line_bot_api.push_message(user_id, buttons_template_message)
-        setting_leave_reason = True
+        data[user_id]['setting_leave_reason'] = True
 
     def endofapplyleave():
 
@@ -148,18 +148,18 @@ def callback():
         }
 
         message = TextSendMessage(
-            text="了解，感謝告知！\n{}\n{}\n{}\n{}".format(
-                '從 ' + leave_start_time.replace('T', ' '),
-                '到' + leave_end_time.replace('T', ' '),
-                '類別：' + leave_reason_show[leave_type],
-                '原因：' + leave_reason)
+            text="了解，感謝告知！\n\n{}\n{}\n{}\n{}".format(
+                '從 ' + data[user_id]['leave_start_time'].replace('T', ' '),
+                '到 ' + data[user_id]['leave_end_time'].replace('T', ' '),
+                '類別：' + leave_reason_show[data[user_id]['leave_type']],
+                '原因：' + data[user_id]['leave_reason'])
         )
 
         line_bot_api.push_message(user_id, message)
 
     def cancelleave():
 
-        setting_leave_reason = False
+        data[user_id]['setting_leave_reason'] = False
 
         message = TextSendMessage(
             text="取消請假"
@@ -174,10 +174,10 @@ def callback():
             setleavestarttime()
 
         # store message
-        if setting_leave_reason == True:
+        if data[user_id]['setting_leave_reason'] == True:
             # store leave reason
-            leave_reason = event['message']['text']
-            setting_leave_reason = False
+            data[user_id]['leave_reason'] = event['message']['text']
+            data[user_id]['setting_leave_reason'] = False
             endofapplyleave()
 
     # postback response
@@ -193,13 +193,11 @@ def callback():
         if 'datatype' in query:
             # store data
             if query['datatype'] == 'startdate':
-                leave_start_time = event['postback']['params']['datetime']
+                data[user_id]['leave_start_time'] = event['postback']['params']['datetime']
             if query['datatype'] == 'enddate':
-                leave_end_time = event['postback']['params']['datetime']
+                data[user_id]['leave_end_time'] = event['postback']['params']['datetime']
             if query['datatype'] == 'leavetype':
-                leave_type = query['leavetype']
-
-    print('###', leave_start_time, leave_end_time, leave_type, leave_reason, setting_leave_reason)
+                data[user_id]['leave_type'] = query['leavetype']
 
     return 'OK'
 
