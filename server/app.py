@@ -16,7 +16,7 @@ line_bot_api = LineBotApi('crvE525why6WynrVvNDD4EnXvEfWsAK4W8tjYHL18APUAkuI1NC6I
 # Channel Secret
 handler = WebhookHandler('8ce8beaa96240ba2beb9a47fdff092fb')
 
-user_id = 'Ue171fd928b7c3dee72656c700742be92'
+#user_id = 'Ue171fd928b7c3dee72656c700742be92'
 
 # leaving apply parameters
 leave_start_time = ''
@@ -35,6 +35,10 @@ def callback():
     print("Request body: " + body, "Signature: " + signature)
 
     global setting_leave_reason, leave_start_time, leave_end_time, leave_type, leave_reason
+
+    event = json.loads(body)['events'][0]
+
+    user_id = event['source']['userId']
 
     def setleavestarttime():
         buttons_template_message = TemplateSendMessage(
@@ -153,19 +157,18 @@ def callback():
 
         line_bot_api.push_message(user_id, message)
 
-    event = json.loads(body)['events'][0]
-
-    # response keywords
-    if 'text' in event['message']:
+    # response message
+    if 'message' in event:
+        # response keywords
         if event['message']['text'] == '我要請假':
             setleavestarttime()
 
-    # store message
-    if setting_leave_reason == True:
-        # store leave reason
-        leave_reason = event['message']['text']
-        setting_leave_reason = False
-        endofapplyleave()
+        # store message
+        if setting_leave_reason == True:
+            # store leave reason
+            leave_reason = event['message']['text']
+            setting_leave_reason = False
+            endofapplyleave()
 
     # postback response
     if event['type'] == 'postback':
@@ -206,5 +209,5 @@ def absent():
             ]
         )
     )
-
+    user_id = 'Ue171fd928b7c3dee72656c700742be92'
     line_bot_api.push_message(user_id, buttons_template_message)
