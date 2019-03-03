@@ -23,7 +23,7 @@ leave_start_time = ''
 leave_end_time = ''
 leave_type = ''
 leave_reason = ''
-setting_leave_reason = False
+setting_leave_reason = False # store next message if true
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -155,38 +155,36 @@ def callback():
 
     event = json.loads(body)['events'][0]
 
-    if setting_leave_reason == True and 'text' in event['message']:
-        print('@@@@@ ', event['message']['text'])
+    # response keywords
+    if 'text' in event['message']:
+        if event['message']['text'] == '我要請假'：
+            setleavestarttime()
+
+    # store message
+    if setting_leave_reason == True:
+        # store leave reason
         leave_reason = event['message']['text']
         setting_leave_reason = False
         endofapplyleave()
-    else:
-        if event['type'] == 'postback':
-            query = {}
-            for item in event['postback']['data'].split('&'):
-                query[item.split('=')[0]] = item.split('=')[1]
-            print(query)
 
-            if 'action' in query:
-                if query['action'] == 'setleavestarttime':
-                    setleavestarttime()
-                if query['action'] == 'setleaveendtime':
-                    setleaveendtime()
-                if query['action'] == 'setleavetype':
-                    setleavetype()
-                if query['action'] == 'setleavereason':
-                    setleavereason()
-                if query['action'] == 'endofapplyleave':
-                    endofapplyleave()
-                if query['action'] == 'cancelleave':
-                    cancelleave()
-            if 'datatype' in query:
-                if query['datatype'] == 'startdate':
-                    leave_start_time = event['postback']['params']['datetime']
-                if query['datatype'] == 'enddate':
-                    leave_end_time = event['postback']['params']['datetime']
-                if query['datatype'] == 'leavetype':
-                    leave_type = query['leavetype']
+    # postback response
+    if event['type'] == 'postback':
+        query = {}
+        for item in event['postback']['data'].split('&'):
+            query[item.split('=')[0]] = item.split('=')[1]
+
+        if 'action' in query:
+            # call function by function name string
+            function_name = query['action']
+            locals()[function_name]()
+        if 'datatype' in query:
+            # store data
+            if query['datatype'] == 'startdate':
+                leave_start_time = event['postback']['params']['datetime']
+            if query['datatype'] == 'enddate':
+                leave_end_time = event['postback']['params']['datetime']
+            if query['datatype'] == 'leavetype':
+                leave_type = query['leavetype']
 
     print('###', leave_start_time, leave_end_time, leave_type, leave_reason, setting_leave_reason)
 
@@ -210,11 +208,3 @@ def absent():
     )
 
     line_bot_api.push_message(user_id, buttons_template_message)
-
-@app.route("/a", methods=['GET'])
-def q():
-    message = TextSendMessage(
-        text='qwe'
-    )
-
-    line_bot_api.push_message(user_id, message)
