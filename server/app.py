@@ -157,7 +157,7 @@ def callback():
 
     # response keywords
     if 'text' in event['message']:
-        if event['message']['text'] == '我要請假'：
+        if event['message']['text'] == '我要請假':
             setleavestarttime()
 
     # store message
