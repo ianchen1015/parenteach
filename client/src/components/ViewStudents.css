@@ -8,3 +8,11 @@ div#upper-buttons {
     left: 38px;
     z-index: 4;
 }
+
+.user-info {
+    position: absolute !important;
+    left: 25px;
+}
+.absent {
+    background-color: gray; 
+}

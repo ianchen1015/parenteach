@@ -207,7 +207,7 @@ def absent():
     buttons_template_message = TemplateSendMessage(
         alt_text='您的孩子尚未到校',
         template=ButtonsTemplate(
-            text='⚠️ 尚未到校\n今日 (1/03) 您的孩子 陳小明 尚未抵達教室，請問他是否需要請假呢？',
+            text='⚠️ 尚未到校\n今日 (1/03) 您的孩子尚未抵達教室，請問他是否需要請假呢？',
             actions=[
                 PostbackTemplateAction(
                     label='開始請假',

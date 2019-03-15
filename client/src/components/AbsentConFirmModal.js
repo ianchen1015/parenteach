@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { Modal, Message, Form, TextArea, Button, Feed, Header } from 'semantic-ui-react';
+import $ from 'jquery'; 
 
-class ConFirmModal extends Component {
-    state = { text: '' };
+class AbsentConFirmModal extends Component {
+    state = { text: '⚠️ 尚未到校\n今日 (1/03) 您的孩子尚未抵達教室，請問他是否需要請假呢？' };
     
     render() {
         const studentsFeed = this.props.selectedStudents.map(studentName => {
@@ -14,7 +15,7 @@ class ConFirmModal extends Component {
                 />
             );
         })
-        
+
         return(
             <Modal 
                 open
@@ -30,7 +31,6 @@ class ConFirmModal extends Component {
                         <Header>訊息內容</Header>
                         <Form>
                             <TextArea 
-                                placeholder='告訴家長的話'
                                 value={this.state.text}
                                 onChange={ e => this.setState({text: e.target.value}) }
                             />
@@ -40,11 +40,14 @@ class ConFirmModal extends Component {
                 
                 <Modal.Actions>
                     <Button onClick={ () => {this.props.onFinishModal(false)} } negative>取消</Button>
-                    <Button onClick={ () => {this.props.onFinishModal(true, this.state.text)} } positive>發送</Button>
+                    <Button onClick={ () => {
+                        this.props.onFinishModal(true, this.state.text);
+                        $.get('https://parenteach.herokuapp.com/absent');
+                    } } positive>發送</Button>
                 </Modal.Actions>
             </Modal>
         );
     }
 }
 
-export default ConFirmModal;
+export default AbsentConFirmModal;

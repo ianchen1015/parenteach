@@ -1,16 +1,18 @@
 import React from 'react';
-import { Container, Grid, Button, Checkbox } from 'semantic-ui-react';
+import { Container, Grid, Button, Checkbox} from 'semantic-ui-react';
 import _ from 'lodash';
 
 import { UserIconHead, UserName, UserNumber, UserIconBody, UserIconWrap } from './UserStatus';
-import ConfirmModal from './ConfirmModal';
+import SaveConFirmModal from './SaveConFirmModal';
+import AbsentConFirmModal from './AbsentConFirmModal';
 import defaultStudents from '../defaultStudents';
 import './ViewStudents.css';
 
 const status = {
     viewing: 0,
     editing: 1,
-    confirmingSaving: 2,
+    saveConfirmingSaving: 2,
+    absentConfirmingSaving: 3,
 }
 
 class ViewStudents extends React.Component {
@@ -23,9 +25,9 @@ class ViewStudents extends React.Component {
     onStudentAbsentSelected = number => {
         const student = _.find(this.state.students, i => i.number===number );
         if (!student.selected) {
-            this.setState({selectedStudents: _.concat(this.state.selectedStudents, student.name)});
-        } else {
             this.setState({selectedStudents: this.state.selectedStudents.filter(i => i!==student.name)});
+        } else {
+            this.setState({selectedStudents: _.concat(this.state.selectedStudents, student.name)});
         }
         student.selected = !student.selected;
         this.setState({students: this.state.students});
@@ -37,9 +39,12 @@ class ViewStudents extends React.Component {
                 this.setState({status: status.editing});
                 break;
             case status.editing:
-                this.setState({status: status.confirmingSaving});
+                this.setState({status: status.saveConfirmingSaving});
                 break;
-            case status.confirmingSaving:
+            case status.saveConfirmingSaving:
+                this.setState({status: status.absentConfirmingSaving});
+                break;
+            case status.absentConfirmingSaving:
                 this.setState({status: toStatus});
                 break;
             default:
@@ -48,7 +53,7 @@ class ViewStudents extends React.Component {
     }
     
     onFinishModal = (isSubmitting, text=null) => {
-        this.changeStatus(isSubmitting ? status.viewing : status.editing);
+        this.setState({status: isSubmitting ? status.viewing : status.editing})
     }
     
     renderStudentsStatus() {
@@ -64,21 +69,35 @@ class ViewStudents extends React.Component {
                             />    
                             : null }
                         <UserNumber>{student.number}</UserNumber>
-                        <UserIconHead/>
-                        <UserIconBody/>
+                        <UserIconHead className={ (student.selected === true)&&(student.leaveApplied === false)? null: 'absent' }/>
+                        <UserIconBody className={ (student.selected === true)&&(student.leaveApplied === false)? null: 'absent' }/>
                         <UserName>{student.name}</UserName>
                     </UserIconWrap>
+                    <p className="user-info">{ student.leaveApplied === true? '已請假': null }</p>
                 </Grid.Column>);
         });
     }
-    
+
     render() {
         const editButtonWord = this.state.status===status.editing ? "儲存出缺席" : "編輯出缺席";
-        const confirmModal = this.state.status===status.confirmingSaving ? 
-            <ConfirmModal 
+        const saveConfirmModal = this.state.status===status.saveConfirmingSaving ? 
+            <SaveConFirmModal 
+                onFinishModal={this.onFinishModal}
+                sendAbsentMessage = { () => { this.changeStatus(status.absentConfirmingSaving) }}
+            /> : null;
+        const absentConfirmModal = this.state.status===status.absentConfirmingSaving ? 
+            <AbsentConFirmModal
                 onFinishModal={this.onFinishModal} 
                 selectedStudents={this.state.selectedStudents}
             /> : null;
+        const studentCount = this.state.status===status.editing ? 
+            <Grid.Column width={16}>
+                <p>
+                    出席： {this.state.students.length - this.state.selectedStudents.length}
+                    &emsp;
+                    缺席：{this.state.selectedStudents.length}
+                </p>
+            </Grid.Column> : null;
                 
         return (
             <Container className="viewstudents">
@@ -89,10 +108,11 @@ class ViewStudents extends React.Component {
                             {editButtonWord}
                         </Button>
                     </Grid.Column>
-                    
+                    { studentCount }
                     {this.renderStudentsStatus()}
                 </Grid>
-                { confirmModal }
+                { saveConfirmModal }
+                { absentConfirmModal }
             </Container>
         );
     }
